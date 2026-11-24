@@ -1,0 +1,2214 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="tool">
+  <meta name="design-style" content="sticker">
+  <title>倉頡筆劃類輔助字形打地鼠大作戰</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..900;1,9..40,400..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+
+      /* Page and surfaces (Sticker style) */
+      --background: #fef7ff;
+      --surface-container-low: #ffffff;
+      --surface-container: #f8eef8;
+      --surface-container-high: #f2e8f2;
+
+      /* Ink */
+      --on-surface: #2e1a28;
+      --on-surface-variant: #604868;
+
+      /* Rules */
+      --outline: #907898;
+      --outline-variant: #dcc8e0;
+
+      /* Accents */
+      --primary: #c2207f;
+      --on-primary: #ffffff;
+      --primary-container: #f080c0;
+      --on-primary-container: #2e1a28;
+      --secondary: #7c52aa;
+      --tertiary: #0096cc;
+      --error: #c53030;
+      --on-error: #ffffff;
+
+      /* Data series */
+      --data-1: #c2207f;
+      --data-2: #7c52aa;
+      --data-3: #0096cc;
+      --data-4: #d96a00;
+      --data-context: #c8b8d0;
+
+      /* Fonts (Non-Latin first per design_foundation) */
+      --font-headline: 'Noto Sans TC', 'DM Sans', sans-serif;
+      --font-body: 'Noto Sans TC', 'DM Sans', sans-serif;
+      --font-label: 'Noto Sans TC', 'DM Sans', monospace;
+
+      /* Shape */
+      --rounded: 1rem;
+      --rounded-lg: 1.75rem;
+      --rounded-full: 9999px;
+
+      /* Style effects */
+      --shadow-pink: 0 4px 16px rgb(224 64 160 / 0.2);
+      --shadow-pink-deep: 0 10px 28px rgb(224 64 160 / 0.32);
+      --shadow-grape: 0 4px 16px rgb(124 82 170 / 0.2);
+      --shadow-sky: 0 4px 16px rgb(0 150 204 / 0.2);
+      --pop-scale: scale(1.03);
+      --lift: translateY(-4px);
+      --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      /* Shared & Semantic tokens */
+      --positive: #15803d;
+      --positive-container: #dcfce7;
+      --warning: #d96a00;
+      --warning-container: #fef3c7;
+      --error-container: #fee2e2;
+      --focus: var(--primary);
+
+      /* Game playfield tokens */
+      --meadow-bg: #ebf9ee;
+      --meadow-bg-alt: #dcf2e2;
+      --meadow-border: #aadcb6;
+      --hole-rim: #c49263;
+      --hole-rim-dark: #8c5a30;
+      --hole-void: #3b2213;
+      --mole-fur: #9c6644;
+      --mole-fur-dark: #75492e;
+      --mole-snout: #f7d6be;
+      --mole-cheek: #f48fb1;
+      --mole-sign: #fffdf7;
+      --mole-sign-border: #d9b99b;
+      --mallet-wood: #d99148;
+      --mallet-head: #e65100;
+      --mallet-band: #ffca28;
+      --star-gold: #f59e0b;
+      --shadow-meadow: 0 6px 20px rgb(21 128 61 / 0.14);
+      --shadow-fever: 0 0 24px rgb(194 32 127 / 0.35);
+
+      /* Type scale (Focused Tool compact) */
+      --display-size: clamp(1.35rem, 1.05rem + 1vw, 1.75rem);
+      --headline-size: clamp(1.1rem, 0.95rem + 0.5vw, 1.35rem);
+      --subhead-size: clamp(0.95rem, 0.88rem + 0.25vw, 1.1rem);
+      --body-size: clamp(0.9375rem, 0.88rem + 0.15vw, 1rem);
+      --label-size: 0.75rem;
+
+      /* Spacing scale (4pt base) */
+      --space-2xs: 0.15rem;
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 0.85rem;
+      --space-lg: 1.25rem;
+      --space-xl: 2rem;
+      --space-2xl: 3rem;
+      --space-3xl: 4.5rem;
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+      --dur-long: 420ms;
+    }
+
+    /* Base reset */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      overflow-x: clip;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.5;
+      -webkit-tap-highlight-color: transparent;
+    }
+    header { position: static !important; }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    /* Compact 100vh viewport shell (~80-85% footprint so everything sits in 1 screen) */
+    .app-shell {
+      height: 100dvh;
+      max-height: 100dvh;
+      width: 100%;
+      max-width: 920px;
+      margin: 0 auto;
+      padding: var(--space-sm) var(--space-md);
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      gap: var(--space-sm);
+      overflow: hidden;
+    }
+    .app-shell * { min-width: 0; }
+
+    /* Header + HUD */
+    .top-header {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .game-title {
+      margin: 0;
+      font-family: var(--font-headline);
+      font-weight: 900;
+      font-size: var(--display-size);
+      line-height: 1.1;
+      color: var(--on-surface);
+    }
+    .game-title em {
+      font-style: normal;
+      color: var(--primary);
+    }
+
+    .grade-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--space-2xs) var(--space-sm);
+      border-radius: var(--rounded-full);
+      background-color: var(--primary-container);
+      color: var(--on-primary-container);
+      font-size: var(--label-size);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+      min-height: 44px;
+      padding: var(--space-xs) var(--space-md);
+      border: none;
+      border-radius: var(--rounded-full);
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      transition: transform var(--dur-short) var(--ease-bounce),
+                  box-shadow var(--dur-short) var(--ease-out),
+                  background-color var(--dur-micro) var(--ease-out);
+    }
+    .btn:hover { transform: var(--pop-scale); }
+    .btn:active { transform: scale(0.96); }
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-compact {
+      min-height: 36px;
+      padding: var(--space-xs) var(--space-sm);
+      font-size: 0.85rem;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: var(--on-primary);
+      box-shadow: var(--shadow-pink);
+    }
+    .btn-primary:hover { box-shadow: var(--shadow-pink-deep); }
+
+    .btn-secondary {
+      background-color: var(--secondary);
+      color: var(--on-primary);
+      box-shadow: var(--shadow-grape);
+    }
+
+    .btn-ghost {
+      background-color: var(--surface-container-low);
+      color: var(--on-surface);
+      box-shadow: var(--shadow-sky);
+    }
+
+    /* HUD Strip */
+    .hud-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr));
+      gap: var(--space-sm);
+      align-items: stretch;
+    }
+
+    .hud-card {
+      background-color: var(--surface-container-low);
+      border-radius: var(--rounded);
+      padding: var(--space-xs) var(--space-sm);
+      box-shadow: var(--shadow-sky);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: var(--space-2xs);
+      position: relative;
+    }
+    .hud-card:nth-child(2) { box-shadow: var(--shadow-pink); }
+    .hud-card:nth-child(3) { box-shadow: var(--shadow-grape); }
+    .hud-card:nth-child(4) { box-shadow: var(--shadow-pink); }
+
+    .hud-card.fever-active {
+      background-color: var(--warning-container);
+      box-shadow: var(--shadow-fever);
+      animation: feverPulse 0.7s var(--ease-in-out) infinite alternate;
+    }
+
+    .hud-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-xs);
+    }
+
+    .hud-label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 700;
+      color: var(--on-surface-variant);
+    }
+
+    .hud-value {
+      font-weight: 900;
+      font-size: clamp(1.05rem, 0.9rem + 0.5vw, 1.35rem);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+      color: var(--on-surface);
+    }
+    .hud-value.accent { color: var(--primary); }
+    .hud-value.urgent { color: var(--error); }
+
+    .timer-track {
+      width: 100%;
+      height: 8px;
+      border-radius: var(--rounded-full);
+      background-color: var(--surface-container-high);
+      overflow: hidden;
+    }
+    .timer-fill {
+      height: 100%;
+      width: 100%;
+      border-radius: var(--rounded-full);
+      background-color: var(--tertiary);
+      transition: width 250ms linear, background-color var(--dur-short) var(--ease-out);
+    }
+    .timer-fill.low { background-color: var(--error); }
+
+    /* Target Prompt Banner */
+    .prompt-card {
+      background-color: var(--surface-container-low);
+      border-radius: var(--rounded);
+      padding: var(--space-xs) var(--space-md);
+      box-shadow: var(--shadow-pink);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-sm);
+      min-height: 58px;
+      transition: box-shadow var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-bounce);
+    }
+    .prompt-card.fever-glow {
+      box-shadow: var(--shadow-fever);
+    }
+    .prompt-card.pop-change {
+      animation: promptPop 320ms var(--ease-bounce);
+    }
+
+    .prompt-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+    }
+
+    .prompt-ask {
+      font-weight: 700;
+      font-size: var(--subhead-size);
+      color: var(--on-surface-variant);
+    }
+
+    .target-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: var(--space-xs) var(--space-md);
+      border-radius: var(--rounded-full);
+      background-color: var(--primary);
+      color: var(--on-primary);
+      box-shadow: var(--shadow-pink);
+    }
+
+    .target-root-char {
+      font-weight: 900;
+      font-size: clamp(1.25rem, 1.05rem + 0.7vw, 1.6rem);
+      line-height: 1;
+    }
+
+    .target-key-cap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 26px;
+      height: 26px;
+      padding: 0 var(--space-xs);
+      border-radius: var(--rounded-full);
+      background-color: var(--surface-container-low);
+      color: var(--primary);
+      font-weight: 900;
+      font-size: 0.9rem;
+    }
+
+    .target-stroke-type {
+      font-weight: 700;
+      font-size: 0.85rem;
+      opacity: 0.95;
+    }
+
+    .prompt-feedback {
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--rounded-full);
+      background-color: var(--surface-container);
+      color: var(--on-surface);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 300px;
+    }
+    .prompt-feedback.good {
+      background-color: var(--positive-container);
+      color: var(--positive);
+    }
+    .prompt-feedback.bad {
+      background-color: var(--error-container);
+      color: var(--error);
+    }
+
+    /* 3x3 Playboard */
+    .playboard-wrap {
+      position: relative;
+      background-color: var(--meadow-bg);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md);
+      box-shadow: var(--shadow-meadow);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      cursor: crosshair;
+      user-select: none;
+    }
+    .playboard-wrap.board-fever {
+      box-shadow: var(--shadow-fever);
+    }
+
+    .mole-grid {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: repeat(3, minmax(0, 1fr));
+      gap: clamp(0.45rem, 1.2vh, 0.85rem);
+    }
+
+    .hole-btn {
+      position: relative;
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      min-height: 82px;
+      border-radius: var(--rounded);
+      overflow: visible;
+    }
+    .hole-btn:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    /* Mole Pop Mask */
+    .mole-stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .mole-actor {
+      position: relative;
+      width: clamp(78px, 13vh, 118px);
+      height: clamp(76px, 13.5vh, 116px);
+      transform: translateY(115%);
+      transition: transform 210ms var(--ease-bounce);
+      will-change: transform;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .hole-btn.is-up .mole-actor {
+      transform: translateY(6%);
+    }
+    .hole-btn.is-hit .mole-actor {
+      transform: translateY(14%) scale(1.06, 0.86);
+      transition: transform 110ms var(--ease-out);
+    }
+    .hole-btn.is-wrong .mole-actor {
+      animation: moleShake 280ms var(--ease-in-out);
+    }
+
+    .mole-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      display: block;
+    }
+
+    /* Signboard SVG overlay inside mole */
+    .sign-glyph-box {
+      position: absolute;
+      bottom: 8%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 58%;
+      height: 50%;
+      background-color: var(--mole-sign);
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 0 var(--mole-sign-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4%;
+    }
+    .sign-glyph-svg {
+      width: 82%;
+      height: 82%;
+      color: var(--on-surface);
+    }
+
+    /* Dizzy stars & eyes visibility */
+    .mole-eyes-normal { display: block; }
+    .mole-eyes-dizzy { display: none; }
+    .mole-stars-spin { display: none; }
+    .hole-btn.is-hit .mole-eyes-normal { display: none; }
+    .hole-btn.is-hit .mole-eyes-dizzy { display: block; }
+    .hole-btn.is-hit .mole-stars-spin {
+      display: block;
+      transform-origin: 50px 14px;
+      animation: spinStars 600ms linear infinite;
+    }
+
+    /* Burrow Pit & Mound Rim */
+    .hole-pit {
+      position: absolute;
+      bottom: 4%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: clamp(84px, 15vh, 134px);
+      height: clamp(22px, 3.6vh, 32px);
+      border-radius: var(--rounded-full);
+      background-color: var(--hole-void);
+      box-shadow: 0 4px 0 var(--hole-rim-dark), 0 0 0 5px var(--hole-rim);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .hole-front-lip {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: clamp(92px, 16.5vh, 144px);
+      height: clamp(12px, 2vh, 18px);
+      border-radius: 0 0 var(--rounded-full) var(--rounded-full);
+      background-color: var(--hole-rim);
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    /* Floating Score / Feedback Popup */
+    .hit-popup {
+      position: absolute;
+      top: 6%;
+      left: 50%;
+      transform: translate(-50%, 0);
+      z-index: 15;
+      pointer-events: none;
+      font-weight: 900;
+      font-size: clamp(0.85rem, 0.75rem + 0.4vw, 1.05rem);
+      padding: var(--space-2xs) var(--space-sm);
+      border-radius: var(--rounded-full);
+      white-space: nowrap;
+      animation: floatUpPop 750ms var(--ease-out) forwards;
+    }
+    .hit-popup.fantastic {
+      background-color: var(--primary);
+      color: var(--on-primary);
+      box-shadow: var(--shadow-pink);
+    }
+    .hit-popup.oops {
+      background-color: var(--error);
+      color: var(--on-error);
+    }
+
+    /* Confetti particles */
+    .confetti-burst {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 14;
+      overflow: visible;
+    }
+    .confetti-piece {
+      position: absolute;
+      left: 50%;
+      top: 42%;
+      width: 10px;
+      height: 10px;
+      border-radius: var(--rounded-full);
+      animation: confettiFly 650ms var(--ease-out) forwards;
+    }
+
+    /* Wooden Mallet Overlay */
+    .mallet-cursor {
+      position: absolute;
+      width: 68px;
+      height: 68px;
+      pointer-events: none;
+      z-index: 25;
+      transform: translate(-24%, -72%) rotate(18deg);
+      transform-origin: 75% 85%;
+      opacity: 0;
+      transition: opacity var(--dur-micro) var(--ease-out);
+    }
+    .mallet-cursor.visible {
+      opacity: 1;
+    }
+    .mallet-cursor.whacking {
+      animation: malletWhack 240ms var(--ease-bounce);
+    }
+
+    /* Bottom 7-Root Indicator Bar */
+    .root-strip {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: var(--space-xs);
+    }
+
+    .root-chip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+      padding: var(--space-xs) var(--space-xs);
+      border-radius: var(--rounded-full);
+      background-color: var(--surface-container-low);
+      color: var(--on-surface);
+      box-shadow: var(--shadow-sky);
+      font-weight: 700;
+      font-size: clamp(0.8rem, 0.72rem + 0.25vw, 0.95rem);
+      transition: transform var(--dur-short) var(--ease-bounce),
+                  background-color var(--dur-short) var(--ease-out),
+                  color var(--dur-short) var(--ease-out);
+      white-space: nowrap;
+    }
+    .root-chip .key-dot {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: var(--rounded-full);
+      background-color: var(--surface-container-high);
+      color: var(--secondary);
+      font-size: 0.75rem;
+      font-weight: 900;
+    }
+    .root-chip.active-target {
+      background-color: var(--primary);
+      color: var(--on-primary);
+      box-shadow: var(--shadow-pink-deep);
+      transform: translateY(-2px) scale(1.04);
+    }
+    .root-chip.active-target .key-dot {
+      background-color: var(--surface-container-low);
+      color: var(--primary);
+    }
+
+    /* Overlays (Start, Study Guide, End Summary) */
+    .overlay-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgb(46 26 40 / 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-md);
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--dur-short) var(--ease-out);
+    }
+    .overlay-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 680px;
+      max-height: 90dvh;
+      overflow-y: auto;
+      background-color: var(--surface-container-low);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      box-shadow: var(--shadow-pink-deep);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      transform: scale(0.95);
+      transition: transform var(--dur-short) var(--ease-bounce);
+    }
+    .overlay-backdrop.open .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-sm);
+    }
+    .modal-title {
+      margin: 0;
+      font-weight: 900;
+      font-size: clamp(1.25rem, 1.05rem + 0.7vw, 1.6rem);
+      color: var(--on-surface);
+    }
+    .modal-title em {
+      font-style: normal;
+      color: var(--primary);
+    }
+
+    .modal-desc {
+      margin: 0;
+      color: var(--on-surface-variant);
+      max-width: 65ch;
+    }
+
+    /* Start Screen Preview Chips */
+    .preview-roots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: var(--space-sm);
+    }
+    .study-root-card {
+      background-color: var(--surface-container);
+      border-radius: var(--rounded);
+      padding: var(--space-sm) var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .study-root-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 900;
+      color: var(--on-surface);
+    }
+    .study-key-pill {
+      padding: var(--space-2xs) var(--space-sm);
+      border-radius: var(--rounded-full);
+      background-color: var(--secondary);
+      color: var(--on-primary);
+      font-size: var(--label-size);
+      font-weight: 900;
+    }
+
+    .study-shapes-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .study-shape-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      background-color: var(--surface-container-low);
+      border-radius: var(--rounded);
+      padding: var(--space-xs) var(--space-sm);
+    }
+    .study-glyph-mini {
+      width: 34px;
+      height: 34px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--rounded);
+      background-color: var(--mole-sign);
+      color: var(--on-surface);
+    }
+    .study-shape-meta {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.25;
+    }
+    .study-shape-name {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--on-surface);
+    }
+    .study-shape-ex {
+      font-size: 0.78rem;
+      color: var(--on-surface-variant);
+    }
+
+    /* End Summary Stars & Metrics */
+    .stars-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: var(--space-xs) 0;
+    }
+    .star-badge {
+      width: 48px;
+      height: 48px;
+      color: var(--outline-variant);
+      transition: transform var(--dur-long) var(--ease-bounce), color var(--dur-short) var(--ease-out);
+    }
+    .star-badge.earned {
+      color: var(--star-gold);
+      transform: scale(1.12);
+    }
+
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-sm);
+    }
+    .stat-tile {
+      background-color: var(--surface-container);
+      border-radius: var(--rounded);
+      padding: var(--space-sm);
+      text-align: center;
+    }
+    .stat-tile-label {
+      font-size: var(--label-size);
+      font-weight: 700;
+      color: var(--on-surface-variant);
+    }
+    .stat-tile-val {
+      font-size: 1.35rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      color: var(--primary);
+    }
+
+    .review-section {
+      background-color: var(--surface-container);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .review-heading {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 900;
+      color: var(--on-surface);
+    }
+    .review-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: var(--space-xs);
+    }
+    .review-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      background-color: var(--surface-container-low);
+      border-radius: var(--rounded);
+      padding: var(--space-xs) var(--space-sm);
+    }
+    .review-badge {
+      margin-left: auto;
+      padding: var(--space-2xs) var(--space-xs);
+      border-radius: var(--rounded-full);
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .review-badge.need-review {
+      background-color: var(--error-container);
+      color: var(--error);
+    }
+    .review-badge.mastered {
+      background-color: var(--positive-container);
+      color: var(--positive);
+    }
+
+    .modal-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+    }
+
+    /* Keyframes */
+    @keyframes malletWhack {
+      0% { transform: translate(-24%, -72%) rotate(22deg) scale(1); }
+      45% { transform: translate(-24%, -58%) rotate(-48deg) scale(1.12, 0.92); }
+      75% { transform: translate(-24%, -74%) rotate(10deg) scale(0.96, 1.05); }
+      100% { transform: translate(-24%, -72%) rotate(18deg) scale(1); }
+    }
+
+    @keyframes moleShake {
+      0%, 100% { transform: translateY(8%) translateX(0); }
+      25% { transform: translateY(8%) translateX(-6px) rotate(-4deg); }
+      50% { transform: translateY(8%) translateX(6px) rotate(4deg); }
+      75% { transform: translateY(8%) translateX(-4px) rotate(-2deg); }
+    }
+
+    @keyframes spinStars {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes floatUpPop {
+      0% { opacity: 0; transform: translate(-50%, 10px) scale(0.75); }
+      25% { opacity: 1; transform: translate(-50%, -6px) scale(1.08); }
+      80% { opacity: 1; transform: translate(-50%, -22px) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -32px) scale(0.95); }
+    }
+
+    @keyframes confettiFly {
+      0% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
+      100% { opacity: 0; transform: translate(var(--tx, 0px), var(--ty, -60px)) scale(0.5) rotate(220deg); }
+    }
+
+    @keyframes feverPulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.025); }
+    }
+
+    @keyframes promptPop {
+      0% { transform: scale(0.97); }
+      60% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
+    /* Mobile & Short-Screen Adaptations */
+    @media (max-width: 640px) {
+      .app-shell {
+        padding: var(--space-xs) var(--space-sm);
+        gap: var(--space-xs);
+      }
+      .hud-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .prompt-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: var(--space-xs) var(--space-sm);
+      }
+      .prompt-feedback {
+        max-width: 100%;
+      }
+      .root-strip {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .summary-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-height: 600px) {
+      .app-shell {
+        height: auto;
+        min-height: 100dvh;
+        max-height: none;
+        overflow-y: auto;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <!-- Row 1: Header & Arcade HUD -->
+    <header class="top-header">
+      <div class="brand-row">
+        <div class="title-group">
+          <h1 class="game-title">倉頡筆劃類 <em>打地鼠</em>大作戰</h1>
+          <span class="grade-badge">小四專用 · 7大字根</span>
+        </div>
+        <div class="header-actions">
+          <span class="grade-badge" id="best-score-badge">最高分：0</span>
+          <button type="button" class="btn btn-compact btn-ghost" id="btn-sound" onclick="toggleSound()" aria-label="切換遊戲音效">
+            <span id="sound-icon-label">音效：開</span>
+          </button>
+          <button type="button" class="btn btn-compact btn-secondary" id="btn-open-guide" onclick="openGuide()">
+            字形圖鑑
+          </button>
+        </div>
+      </div>
+
+      <section class="hud-grid" aria-label="遊戲計分板">
+        <div class="hud-card">
+          <div class="hud-top">
+            <span class="hud-label">剩餘時間</span>
+            <span class="hud-value" id="hud-timer">60s</span>
+          </div>
+          <div class="timer-track" role="progressbar" aria-label="剩餘時間進度" aria-valuemin="0" aria-valuemax="60" aria-valuenow="60" id="timer-bar-wrap">
+            <div class="timer-fill" id="timer-fill"></div>
+          </div>
+        </div>
+
+        <div class="hud-card">
+          <div class="hud-top">
+            <span class="hud-label">分數</span>
+            <span class="hud-value accent" id="hud-score">0</span>
+          </div>
+        </div>
+
+        <div class="hud-card">
+          <div class="hud-top">
+            <span class="hud-label">準確率</span>
+            <span class="hud-value" id="hud-accuracy">--%</span>
+          </div>
+        </div>
+
+        <div class="hud-card" id="hud-combo-card">
+          <div class="hud-top">
+            <span class="hud-label">連擊 Combo</span>
+            <span class="hud-value accent" id="hud-combo">x0</span>
+          </div>
+        </div>
+      </section>
+    </header>
+
+    <!-- Row 2: Target Prompt -->
+    <section class="prompt-card" id="prompt-card" aria-live="polite">
+      <div class="prompt-left">
+        <span class="prompt-ask">請敲出這張牌的輔助字形：</span>
+        <div class="target-pill" id="target-pill">
+          <span class="target-root-char" id="target-root-name">竹</span>
+          <span class="target-key-cap" id="target-key-cap">H</span>
+          <span class="target-stroke-type" id="target-stroke-desc">(斜)</span>
+        </div>
+      </div>
+      <div class="prompt-feedback" id="prompt-feedback">準備好了就按下開始！</div>
+    </section>
+
+    <!-- Row 3: 3x3 Whack-a-Mole Grid -->
+    <section class="playboard-wrap" id="playboard" aria-label="3乘3打地鼠遊戲區">
+      <div class="mole-grid" id="mole-grid">
+        <!-- 9 holes generated cleanly via DOM on init -->
+      </div>
+
+      <!-- Wooden Mallet SVG -->
+      <div class="mallet-cursor" id="mallet-cursor" aria-hidden="true">
+        <svg viewBox="0 0 100 100" width="68" height="68" fill="none">
+          <!-- Handle -->
+          <rect x="44" y="38" width="12" height="54" rx="6" fill="var(--mallet-wood)" stroke="var(--on-surface)" stroke-width="4" />
+          <!-- Mallet Head -->
+          <rect x="14" y="10" width="72" height="36" rx="12" fill="var(--mallet-head)" stroke="var(--on-surface)" stroke-width="4" />
+          <!-- Gold Band -->
+          <rect x="22" y="10" width="10" height="36" rx="3" fill="var(--mallet-band)" />
+          <rect x="68" y="10" width="10" height="36" rx="3" fill="var(--mallet-band)" />
+        </svg>
+      </div>
+    </section>
+
+    <!-- Row 4: Strict 7 Stroke-Category Roots Strip (H, I, J, K, L, M, N — NO T!) -->
+    <nav class="root-strip" id="root-strip" aria-label="筆劃類7個字根一覽">
+      <!-- Populated by JS from STROKE_ROOTS -->
+    </nav>
+  </main>
+
+  <!-- Start / Welcome Overlay -->
+  <div class="overlay-backdrop open" id="start-overlay" role="dialog" aria-modal="true" aria-labelledby="start-modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="start-modal-title">準備挑戰<em>倉頡筆劃類</em>地鼠嗎？</h2>
+        <span class="grade-badge">限時 60 秒</span>
+      </div>
+      <p class="modal-desc">
+        地鼠們拿著「<strong>竹(H)、戈(I)、十(J)、大(K)、中(L)、一(M)、弓(N)</strong>」的輔助字形探出頭啦！
+        看清楚上方題目指定的字根，用木槌快速敲出正確的輔助字形就能拿高分、累積連擊狂熱光效！
+      </p>
+      <div class="review-section">
+        <h3 class="review-heading">本次挑戰 7 個筆劃類字根（共 19 個輔助字形）</h3>
+        <div id="start-preview-chips" style="display:flex; flex-wrap:wrap; gap:var(--space-xs);"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="openGuide()">先看字形圖鑑</button>
+        <button type="button" class="btn btn-primary" onclick="startGame()">開始 60 秒大作戰！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Study Guide Overlay -->
+  <div class="overlay-backdrop" id="guide-overlay" role="dialog" aria-modal="true" aria-labelledby="guide-modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="guide-modal-title">筆劃類<em>輔助字形</em>小圖鑑</h2>
+        <button type="button" class="btn btn-compact btn-ghost" onclick="closeGuide()">關閉</button>
+      </div>
+      <p class="modal-desc">記住這 7 個筆劃類字根的家族長相，上場打地鼠就能百發百中！</p>
+      <div class="preview-roots-grid" id="guide-grid">
+        <!-- Populated by JS -->
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary" onclick="closeGuideAndStartIfIdle()">記好了，開始挑戰！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Over Summary Overlay -->
+  <div class="overlay-backdrop" id="summary-overlay" role="dialog" aria-modal="true" aria-labelledby="summary-modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title" id="summary-modal-title">時間到！<em id="summary-verdict">倉頡小達人</em></h2>
+        <span class="grade-badge" id="summary-new-best" style="display:none;">破紀錄啦！</span>
+      </div>
+
+      <div class="stars-row" id="summary-stars" aria-label="星級評級">
+        <!-- 3 stars -->
+      </div>
+
+      <div class="summary-stats">
+        <div class="stat-tile">
+          <div class="stat-tile-label">總得分</div>
+          <div class="stat-tile-val" id="sum-score">0</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-tile-label">準確率</div>
+          <div class="stat-tile-val" id="sum-acc">0%</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-tile-label">最高連擊</div>
+          <div class="stat-tile-val" id="sum-combo">x0</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-tile-label">敲中 / 總敲擊</div>
+          <div class="stat-tile-val" id="sum-hits">0 / 0</div>
+        </div>
+      </div>
+
+      <div class="review-section">
+        <h3 class="review-heading" id="review-heading">複習回顧</h3>
+        <div class="review-list" id="review-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="openGuide()">查看完整圖鑑</button>
+        <button type="button" class="btn btn-primary" onclick="startGame()">再玩一次</button>
+      </div>
+    </div>
+  </div>
+
+  <api-shim></api-shim>
+  <script>
+    /* =========================================================================
+       Strict 7 Stroke-Category Roots (H, I, J, K, L, M, N)
+       ========================================================================= */
+    const STROKE_ROOTS = [
+      {
+        key: `H`,
+        root: `竹`,
+        strokeDesc: `斜`,
+        shapes: [
+          {
+            id: `h_bamboo_top`,
+            glyph: `⺮`,
+            name: `竹字頭`,
+            examples: `如：笑、筆、等`,
+            svg: `<path d="M 34 26 Q 26 46 14 62 M 28 42 L 46 42 M 33 49 L 39 62 M 68 26 Q 60 46 49 62 M 62 42 L 84 42 M 67 49 L 74 62" />`
+          },
+          {
+            id: `h_slant_pie`,
+            glyph: `丿`,
+            name: `斜撇`,
+            examples: `如：千、生、我`,
+            svg: `<path d="M 66 18 Q 56 54 26 82" />`
+          },
+          {
+            id: `h_double_pie`,
+            glyph: `𠂆`,
+            name: `兩撇`,
+            examples: `如：反、脈、派、肩、扁`,
+            svg: `<path d="M 68 18 Q 48 28 28 36 M 31 32 Q 30 62 18 84" />`
+          }
+        ]
+      },
+      {
+        key: `I`,
+        root: `戈`,
+        strokeDesc: `點`,
+        shapes: [
+          {
+            id: `i_dot`,
+            glyph: `丶`,
+            name: `點`,
+            examples: `如：主、玉、良`,
+            svg: `<path d="M 40 34 Q 51 46 61 64" />`
+          },
+          {
+            id: `i_si`,
+            glyph: `厶`,
+            name: `三角`,
+            examples: `如：台、公、去`,
+            svg: `<path d="M 54 22 Q 40 46 22 72 L 74 64 M 64 48 L 78 76" />`
+          },
+          {
+            id: `i_guang`,
+            glyph: `广`,
+            name: `廣字頭`,
+            examples: `如：廣、店、座`,
+            svg: `<path d="M 48 16 L 56 26 M 24 32 L 80 32 M 27 32 Q 25 60 15 84" />`
+          }
+        ]
+      },
+      {
+        key: `J`,
+        root: `十`,
+        strokeDesc: `交`,
+        shapes: [
+          {
+            id: `j_ten`,
+            glyph: `十`,
+            name: `十`,
+            examples: `如：古、早、支`,
+            svg: `<path d="M 16 48 L 84 48 M 50 16 L 50 84" />`
+          },
+          {
+            id: `j_roof`,
+            glyph: `宀`,
+            name: `寶蓋頭`,
+            examples: `如：安、家、字`,
+            svg: `<path d="M 47 28 L 54 38 M 22 42 L 18 62 M 22 44 L 80 44 L 71 60" />`
+          }
+        ]
+      },
+      {
+        key: `K`,
+        root: `大`,
+        strokeDesc: `叉`,
+        shapes: [
+          {
+            id: `k_cross`,
+            glyph: `乂`,
+            name: `交叉`,
+            examples: `如：文、交、希`,
+            svg: `<path d="M 72 20 Q 52 54 22 82 M 26 22 Q 48 54 78 82" />`
+          },
+          {
+            id: `k_dog`,
+            glyph: `犭`,
+            name: `反犬旁`,
+            examples: `如：狗、貓、獅`,
+            svg: `<path d="M 62 22 Q 46 36 24 46 M 34 22 Q 58 48 48 84 L 36 76 M 48 48 Q 36 62 22 74" />`
+          },
+          {
+            id: `k_sick`,
+            glyph: `疒`,
+            name: `病字部`,
+            examples: `如：病、痛、疲`,
+            svg: `<path d="M 52 14 L 58 24 M 28 29 L 82 29 M 31 29 Q 29 58 18 84 M 14 40 L 22 49 M 12 64 L 25 56" />`
+          }
+        ]
+      },
+      {
+        key: `L`,
+        root: `中`,
+        strokeDesc: `縱`,
+        shapes: [
+          {
+            id: `l_vert`,
+            glyph: `丨`,
+            name: `直豎`,
+            examples: `如：川、巾、串`,
+            svg: `<path d="M 50 14 L 50 86" />`
+          },
+          {
+            id: `l_cloth`,
+            glyph: `衤`,
+            name: `衣字旁`,
+            examples: `如：衫、袖、被`,
+            svg: `<path d="M 42 16 L 49 26 M 24 34 L 56 34 Q 42 54 18 70 M 42 50 L 42 86 M 66 44 L 52 56 M 47 54 L 66 68" />`
+          }
+        ]
+      },
+      {
+        key: `M`,
+        root: `一`,
+        strokeDesc: `橫`,
+        shapes: [
+          {
+            id: `m_horiz`,
+            glyph: `一`,
+            name: `平橫`,
+            examples: `如：二、三、天`,
+            svg: `<path d="M 14 50 L 86 50" />`
+          },
+          {
+            id: `m_cliff`,
+            glyph: `厂`,
+            name: `廠字旁`,
+            examples: `如：厚、原、歷`,
+            svg: `<path d="M 22 24 L 82 24 M 26 24 Q 24 56 15 82" />`
+          },
+          {
+            id: `m_hp`,
+            glyph: `丆`,
+            name: `橫撇`,
+            examples: `如：百、而、面`,
+            svg: `<path d="M 18 36 L 82 36 M 52 36 Q 46 52 36 68" />`
+          }
+        ]
+      },
+      {
+        key: `N`,
+        root: `弓`,
+        strokeDesc: `鉤`,
+        shapes: [
+          {
+            id: `n_yi`,
+            glyph: `乙`,
+            name: `折筆彎鉤`,
+            examples: `如：九、乞、飛`,
+            svg: `<path d="M 24 24 L 64 24 L 24 70 Q 22 80 36 80 L 74 80 L 79 62" />`
+          },
+          {
+            id: `n_ear`,
+            glyph: `阝`,
+            name: `雙耳旁`,
+            examples: `如：阿、隊、陽`,
+            svg: `<path d="M 34 18 L 34 86 M 34 20 L 66 20 L 52 44 Q 76 54 68 68 Q 62 74 48 68" />`
+          },
+          {
+            id: `n_liao`,
+            glyph: `了`,
+            name: `了字部`,
+            examples: `如：子、好、承`,
+            svg: `<path d="M 24 22 L 72 22 L 48 42 M 48 42 Q 54 64 48 82 L 34 74" />`
+          }
+        ]
+      }
+    ];
+
+    /* Flatten all 19 shapes with back-reference to parent root */
+    const ALL_SHAPES = [];
+    STROKE_ROOTS.forEach(function (rootItem) {
+      rootItem.shapes.forEach(function (s) {
+        ALL_SHAPES.push({
+          id: s.id,
+          glyph: s.glyph,
+          name: s.name,
+          examples: s.examples,
+          svg: s.svg,
+          rootKey: rootItem.key,
+          rootChar: rootItem.root,
+          strokeDesc: rootItem.strokeDesc
+        });
+      });
+    });
+
+    /* =========================================================================
+       Game State & Constants
+       ========================================================================= */
+    const GAME_SECONDS = 60;
+    const MOLE_STAY_MS = 2000;
+    const SPAWN_INTERVAL_MS = 950;
+    const MAX_ACTIVE_MOLES = 3;
+
+    const appData = {
+      bestScore: 0,
+      bestAccuracy: 0,
+      gamesPlayed: 0,
+      soundEnabled: true
+    };
+
+    const game = {
+      running: false,
+      paused: false,
+      timeLeft: GAME_SECONDS,
+      score: 0,
+      combo: 0,
+      maxCombo: 0,
+      correctHits: 0,
+      totalClicks: 0,
+      targetRootIndex: 0,
+      rootQueue: [],
+      holes: [],
+      missedShapeCounts: {},
+      hitShapeCounts: {},
+      timerInterval: null,
+      spawnInterval: null,
+      audioCtx: null
+    };
+
+    /* =========================================================================
+       SVG Helpers
+       ========================================================================= */
+    function buildShapeSvg(svgPaths, className) {
+      return `<svg class="${className}" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${svgPaths}</svg>`;
+    }
+
+    function buildMoleSvg(holeIdx) {
+      return `
+        <svg class="mole-svg" viewBox="0 0 100 100" aria-hidden="true">
+          <!-- Spinning Dizzy Stars -->
+          <g class="mole-stars-spin">
+            <polygon points="26,12 28,17 33,17 29,20 30,25 26,22 22,25 23,20 19,17 24,17" fill="var(--star-gold)" />
+            <polygon points="74,12 76,17 81,17 77,20 78,25 74,22 70,25 71,20 67,17 72,17" fill="var(--star-gold)" />
+            <polygon points="50,2 52,7 57,7 53,10 54,15 50,12 46,15 47,10 43,7 48,7" fill="var(--primary)" />
+          </g>
+          <!-- Ears -->
+          <circle cx="23" cy="30" r="10" fill="var(--mole-fur-dark)" />
+          <circle cx="23" cy="30" r="5" fill="var(--mole-cheek)" />
+          <circle cx="77" cy="30" r="10" fill="var(--mole-fur-dark)" />
+          <circle cx="77" cy="30" r="5" fill="var(--mole-cheek)" />
+          <!-- Body & Head -->
+          <path d="M 16 96 C 16 40, 24 18, 50 18 C 76 18, 84 40, 84 96 Z" fill="var(--mole-fur)" />
+          <!-- Snout -->
+          <ellipse cx="50" cy="46" rx="16" ry="11" fill="var(--mole-snout)" />
+          <ellipse cx="50" cy="42" rx="6" ry="4" fill="var(--primary)" />
+          <!-- Cheeks -->
+          <circle cx="28" cy="43" r="5" fill="var(--mole-cheek)" opacity="0.75" />
+          <circle cx="72" cy="43" r="5" fill="var(--mole-cheek)" opacity="0.75" />
+          <!-- Normal Eyes -->
+          <g class="mole-eyes-normal">
+            <circle cx="36" cy="34" r="4.5" fill="var(--on-surface)" />
+            <circle cx="34.5" cy="32.5" r="1.5" fill="var(--surface-container-low)" />
+            <circle cx="64" cy="34" r="4.5" fill="var(--on-surface)" />
+            <circle cx="62.5" cy="32.5" r="1.5" fill="var(--surface-container-low)" />
+          </g>
+          <!-- Dizzy Eyes -->
+          <g class="mole-eyes-dizzy" stroke="var(--on-surface)" stroke-width="3" stroke-linecap="round">
+            <path d="M 32 30 L 40 38 M 40 30 L 32 38" />
+            <path d="M 60 30 L 68 38 M 68 30 L 60 38" />
+          </g>
+          <!-- Little Paws holding signboard -->
+          <ellipse cx="22" cy="70" rx="8" ry="6" fill="var(--mole-snout)" stroke="var(--mole-fur-dark)" stroke-width="2" />
+          <ellipse cx="78" cy="70" rx="8" ry="6" fill="var(--mole-snout)" stroke="var(--mole-fur-dark)" stroke-width="2" />
+        </svg>
+      `;
+    }
+
+    function buildStarSvg(earned) {
+      return `
+        <svg class="star-badge ${earned ? 'earned' : ''}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" />
+        </svg>
+      `;
+    }
+
+    /* =========================================================================
+       Web Audio API Sound Synthesis (Self-contained)
+       ========================================================================= */
+    function ensureAudio() {
+      if (!appData.soundEnabled) return null;
+      try {
+        if (!game.audioCtx) {
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if (Ctx) game.audioCtx = new Ctx();
+        }
+        if (game.audioCtx && game.audioCtx.state === `suspended`) {
+          game.audioCtx.resume();
+        }
+        return game.audioCtx;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function playTone(type, comboCount) {
+      const ctx = ensureAudio();
+      if (!ctx) return;
+      try {
+        const now = ctx.currentTime;
+        if (type === `hit`) {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const pitchBoost = Math.min(comboCount || 0, 8) * 35;
+          osc.type = `triangle`;
+          osc.frequency.setValueAtTime(520 + pitchBoost, now);
+          osc.frequency.exponentialRampToValueAtTime(880 + pitchBoost, now + 0.14);
+          gain.gain.setValueAtTime(0.22, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.19);
+        } else if (type === `wrong`) {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = `sawtooth`;
+          osc.frequency.setValueAtTime(210, now);
+          osc.frequency.linearRampToValueAtTime(140, now + 0.18);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.21);
+        } else if (type === `finish`) {
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          notes.forEach(function (freq, idx) {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const start = now + idx * 0.09;
+            osc.type = `triangle`;
+            osc.frequency.setValueAtTime(freq, start);
+            gain.gain.setValueAtTime(0.18, start);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.24);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(start);
+            osc.stop(start + 0.25);
+          });
+        }
+      } catch (e) { /* audio ignore */ }
+    }
+
+    /* =========================================================================
+       DOM Builders & Rendering
+       ========================================================================= */
+    function initBoard() {
+      const grid = document.getElementById(`mole-grid`);
+      if (!grid) return;
+      grid.innerHTML = ``;
+      game.holes = [];
+
+      for (let i = 0; i < 9; i++) {
+        const btn = document.createElement(`button`);
+        btn.type = `button`;
+        btn.className = `hole-btn`;
+        btn.dataset.holeIndex = String(i);
+        btn.setAttribute(`aria-label`, `地鼠洞 ${i + 1}`);
+        btn.onclick = function () { whackHole(i); };
+
+        btn.innerHTML = `
+          <div class="mole-stage">
+            <div class="mole-actor">
+              ${buildMoleSvg(i)}
+              <div class="sign-glyph-box" id="sign-box-${i}"></div>
+            </div>
+          </div>
+          <div class="hole-pit"></div>
+          <div class="hole-front-lip"></div>
+          <div class="confetti-burst" id="confetti-${i}"></div>
+        `;
+
+        grid.appendChild(btn);
+        game.holes.push({
+          index: i,
+          el: btn,
+          signBox: document.getElementById(`sign-box-${i}`),
+          confettiBox: document.getElementById(`confetti-${i}`),
+          active: false,
+          state: `idle`,
+          shape: null,
+          hideTimeout: null
+        });
+      }
+
+      /* Render bottom 7-root strip */
+      const strip = document.getElementById(`root-strip`);
+      if (strip) {
+        strip.innerHTML = STROKE_ROOTS.map(function (r, idx) {
+          return `
+            <div class="root-chip" id="root-chip-${idx}">
+              <span class="key-dot">${r.key}</span>
+              <span>${r.root}</span>
+            </div>
+          `;
+        }).join(``);
+      }
+
+      /* Render Start preview chips & Guide grid */
+      const previewChips = document.getElementById(`start-preview-chips`);
+      if (previewChips) {
+        previewChips.innerHTML = STROKE_ROOTS.map(function (r) {
+          return `<span class="study-key-pill">${r.root} (${r.key}) · ${r.shapes.map(function (s) { return s.glyph; }).join(` `)}</span>`;
+        }).join(``);
+      }
+
+      const guideGrid = document.getElementById(`guide-grid`);
+      if (guideGrid) {
+        guideGrid.innerHTML = STROKE_ROOTS.map(function (r) {
+          const itemsHtml = r.shapes.map(function (s) {
+            return `
+              <div class="study-shape-item">
+                <div class="study-glyph-mini">${buildShapeSvg(s.svg, `sign-glyph-svg`)}</div>
+                <div class="study-shape-meta">
+                  <span class="study-shape-name">${s.name}</span>
+                  <span class="study-shape-ex">${s.examples}</span>
+                </div>
+              </div>
+            `;
+          }).join(``);
+          return `
+            <div class="study-root-card">
+              <div class="study-root-head">
+                <span>${r.root}（${r.strokeDesc}）</span>
+                <span class="study-key-pill">按鍵 ${r.key}</span>
+              </div>
+              <div class="study-shapes-list">${itemsHtml}</div>
+            </div>
+          `;
+        }).join(``);
+      }
+
+      setupMalletTracking();
+    }
+
+    function setupMalletTracking() {
+      const playboard = document.getElementById(`playboard`);
+      const mallet = document.getElementById(`mallet-cursor`);
+      if (!playboard || !mallet) return;
+
+      playboard.addEventListener(`pointermove`, function (e) {
+        if (e.pointerType === `touch`) return;
+        const rect = playboard.getBoundingClientRect();
+        mallet.style.left = `${e.clientX - rect.left}px`;
+        mallet.style.top = `${e.clientY - rect.top}px`;
+        mallet.classList.add(`visible`);
+      });
+
+      playboard.addEventListener(`pointerleave`, function () {
+        mallet.classList.remove(`visible`);
+      });
+    }
+
+    function triggerMalletAtHole(holeEl) {
+      const playboard = document.getElementById(`playboard`);
+      const mallet = document.getElementById(`mallet-cursor`);
+      if (!playboard || !mallet || !holeEl) return;
+
+      const boardRect = playboard.getBoundingClientRect();
+      const holeRect = holeEl.getBoundingClientRect();
+      const centerX = holeRect.left - boardRect.left + holeRect.width * 0.56;
+      const centerY = holeRect.top - boardRect.top + holeRect.height * 0.36;
+
+      mallet.style.left = `${centerX}px`;
+      mallet.style.top = `${centerY}px`;
+      mallet.classList.add(`visible`);
+      mallet.classList.remove(`whacking`);
+      void mallet.offsetWidth;
+      mallet.classList.add(`whacking`);
+    }
+
+    function spawnConfetti(holeObj) {
+      if (!holeObj || !holeObj.confettiBox) return;
+      const box = holeObj.confettiBox;
+      box.innerHTML = ``;
+      const colors = [`var(--primary)`, `var(--tertiary)`, `var(--star-gold)`, `var(--secondary)`, `var(--positive)`];
+      const count = 12;
+      for (let i = 0; i < count; i++) {
+        const dot = document.createElement(`span`);
+        dot.className = `confetti-piece`;
+        const angle = (Math.PI * 2 * i) / count;
+        const dist = 36 + Math.random() * 34;
+        const tx = Math.cos(angle) * dist;
+        const ty = Math.sin(angle) * dist - 24;
+        dot.style.setProperty(`--tx`, `${tx.toFixed(1)}px`);
+        dot.style.setProperty(`--ty`, `${ty.toFixed(1)}px`);
+        dot.style.backgroundColor = colors[i % colors.length];
+        box.appendChild(dot);
+      }
+      setTimeout(function () {
+        if (box) box.innerHTML = ``;
+      }, 700);
+    }
+
+    function showHolePopup(holeObj, text, typeClass) {
+      if (!holeObj || !holeObj.el) return;
+      const pop = document.createElement(`div`);
+      pop.className = `hit-popup ${typeClass}`;
+      pop.textContent = text;
+      holeObj.el.appendChild(pop);
+      setTimeout(function () {
+        if (pop.parentNode) pop.parentNode.removeChild(pop);
+      }, 760);
+    }
+
+    /* =========================================================================
+       HUD & Target Updates
+       ========================================================================= */
+    function updateHud() {
+      const timerEl = document.getElementById(`hud-timer`);
+      const fillEl = document.getElementById(`timer-fill`);
+      const barWrap = document.getElementById(`timer-bar-wrap`);
+      const scoreEl = document.getElementById(`hud-score`);
+      const accEl = document.getElementById(`hud-accuracy`);
+      const comboEl = document.getElementById(`hud-combo`);
+      const comboCard = document.getElementById(`hud-combo-card`);
+      const promptCard = document.getElementById(`prompt-card`);
+      const playboard = document.getElementById(`playboard`);
+
+      if (timerEl) {
+        timerEl.textContent = `${game.timeLeft}s`;
+        timerEl.classList.toggle(`urgent`, game.timeLeft <= 10 && game.running);
+      }
+      if (fillEl) {
+        const pct = Math.max(0, Math.min(100, (game.timeLeft / GAME_SECONDS) * 100));
+        fillEl.style.width = `${pct}%`;
+        fillEl.classList.toggle(`low`, game.timeLeft <= 10 && game.running);
+      }
+      if (barWrap) {
+        barWrap.setAttribute(`aria-valuenow`, String(game.timeLeft));
+      }
+      if (scoreEl) {
+        scoreEl.textContent = String(game.score);
+      }
+      if (accEl) {
+        if (game.totalClicks === 0) {
+          accEl.textContent = `--%`;
+        } else {
+          const pct = Math.round((game.correctHits / game.totalClicks) * 100);
+          accEl.textContent = `${pct}%`;
+        }
+      }
+      if (comboEl) {
+        comboEl.textContent = `x${game.combo}`;
+      }
+
+      const isFever = game.combo >= 3;
+      if (comboCard) comboCard.classList.toggle(`fever-active`, isFever);
+      if (promptCard) promptCard.classList.toggle(`fever-glow`, isFever);
+      if (playboard) playboard.classList.toggle(`board-fever`, isFever);
+    }
+
+    function updateBestBadge() {
+      const badge = document.getElementById(`best-score-badge`);
+      if (badge) {
+        badge.textContent = `最高分：${appData.bestScore}`;
+      }
+    }
+
+    function setPromptFeedback(text, tone) {
+      const fb = document.getElementById(`prompt-feedback`);
+      if (!fb) return;
+      fb.textContent = text;
+      fb.classList.remove(`good`, `bad`);
+      if (tone === `good`) fb.classList.add(`good`);
+      if (tone === `bad`) fb.classList.add(`bad`);
+    }
+
+    function refillRootQueue() {
+      const indices = STROKE_ROOTS.map(function (_, i) { return i; });
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = indices[i];
+        indices[i] = indices[j];
+        indices[j] = tmp;
+      }
+      /* Avoid immediate repeat of previous root */
+      if (indices[0] === game.targetRootIndex && indices.length > 1) {
+        const swap = indices[0];
+        indices[0] = indices[1];
+        indices[1] = swap;
+      }
+      game.rootQueue = indices;
+    }
+
+    function pickNextTargetRoot() {
+      if (game.rootQueue.length === 0) {
+        refillRootQueue();
+      }
+      game.targetRootIndex = game.rootQueue.shift();
+      const target = STROKE_ROOTS[game.targetRootIndex];
+
+      const nameEl = document.getElementById(`target-root-name`);
+      const keyEl = document.getElementById(`target-key-cap`);
+      const descEl = document.getElementById(`target-stroke-desc`);
+      const promptCard = document.getElementById(`prompt-card`);
+
+      if (nameEl) nameEl.textContent = target.root;
+      if (keyEl) keyEl.textContent = target.key;
+      if (descEl) descEl.textContent = `(${target.strokeDesc})`;
+
+      if (promptCard) {
+        promptCard.classList.remove(`pop-change`);
+        void promptCard.offsetWidth;
+        promptCard.classList.add(`pop-change`);
+      }
+
+      STROKE_ROOTS.forEach(function (_, idx) {
+        const chip = document.getElementById(`root-chip-${idx}`);
+        if (chip) chip.classList.toggle(`active-target`, idx === game.targetRootIndex);
+      });
+    }
+
+    /* =========================================================================
+       Mole Spawning & Whacking Logic
+       ========================================================================= */
+    function hideHole(holeObj) {
+      if (!holeObj) return;
+      if (holeObj.hideTimeout) {
+        clearTimeout(holeObj.hideTimeout);
+        holeObj.hideTimeout = null;
+      }
+      holeObj.active = false;
+      holeObj.state = `idle`;
+      holeObj.shape = null;
+      holeObj.el.classList.remove(`is-up`, `is-hit`, `is-wrong`);
+      holeObj.el.setAttribute(`aria-label`, `空地鼠洞 ${holeObj.index + 1}`);
+    }
+
+    function clearAllHoles() {
+      game.holes.forEach(function (h) {
+        hideHole(h);
+      });
+    }
+
+    function pickMoleShapeForSpawn() {
+      const targetRoot = STROKE_ROOTS[game.targetRootIndex];
+      const hasTargetUp = game.holes.some(function (h) {
+        return h.active && h.state === `up` && h.shape && h.shape.rootKey === targetRoot.key;
+      });
+
+      /* Guarantee a target mole is up whenever none is currently visible */
+      const wantTarget = !hasTargetUp || Math.random() < 0.45;
+      if (wantTarget) {
+        const targetShapes = ALL_SHAPES.filter(function (s) {
+          return s.rootKey === targetRoot.key;
+        });
+        return targetShapes[Math.floor(Math.random() * targetShapes.length)];
+      } else {
+        const distractorShapes = ALL_SHAPES.filter(function (s) {
+          return s.rootKey !== targetRoot.key;
+        });
+        return distractorShapes[Math.floor(Math.random() * distractorShapes.length)];
+      }
+    }
+
+    function spawnMole() {
+      if (!game.running || game.paused) return;
+      const activeCount = game.holes.filter(function (h) { return h.active; }).length;
+      if (activeCount >= MAX_ACTIVE_MOLES) return;
+
+      const emptyHoles = game.holes.filter(function (h) { return !h.active; });
+      if (emptyHoles.length === 0) return;
+
+      const holeObj = emptyHoles[Math.floor(Math.random() * emptyHoles.length)];
+      const shape = pickMoleShapeForSpawn();
+
+      holeObj.active = true;
+      holeObj.state = `up`;
+      holeObj.shape = shape;
+      if (holeObj.signBox) {
+        holeObj.signBox.innerHTML = buildShapeSvg(shape.svg, `sign-glyph-svg`);
+      }
+      holeObj.el.classList.remove(`is-hit`, `is-wrong`);
+      holeObj.el.classList.add(`is-up`);
+      holeObj.el.setAttribute(`aria-label`, `地鼠拿著輔助字形 ${shape.name}`);
+
+      holeObj.hideTimeout = setTimeout(function () {
+        if (holeObj.state === `up`) {
+          hideHole(holeObj);
+        }
+      }, MOLE_STAY_MS);
+    }
+
+    function whackHole(holeIdx) {
+      const holeObj = game.holes[holeIdx];
+      if (!holeObj) return;
+
+      triggerMalletAtHole(holeObj.el);
+
+      if (!game.running || game.paused) return;
+      if (!holeObj.active || holeObj.state !== `up` || !holeObj.shape) return;
+
+      const targetRoot = STROKE_ROOTS[game.targetRootIndex];
+      const clickedShape = holeObj.shape;
+      game.totalClicks += 1;
+
+      if (clickedShape.rootKey === targetRoot.key) {
+        /* Correct Whack! */
+        if (holeObj.hideTimeout) {
+          clearTimeout(holeObj.hideTimeout);
+          holeObj.hideTimeout = null;
+        }
+        holeObj.state = `hit`;
+        holeObj.el.classList.add(`is-hit`);
+
+        game.correctHits += 1;
+        game.combo += 1;
+        if (game.combo > game.maxCombo) game.maxCombo = game.combo;
+
+        const comboBonus = game.combo >= 3 ? Math.min(100, (game.combo - 2) * 25) : 0;
+        const points = 100 + comboBonus;
+        game.score += points;
+
+        game.hitShapeCounts[clickedShape.id] = (game.hitShapeCounts[clickedShape.id] || 0) + 1;
+
+        playTone(`hit`, game.combo);
+        spawnConfetti(holeObj);
+
+        const popLabel = game.combo >= 3
+          ? `+${points}! COMBO x${game.combo}!`
+          : `+${points}! FANTASTIC!`;
+        showHolePopup(holeObj, popLabel, `fantastic`);
+        setPromptFeedback(`答對了！「${clickedShape.name}」就是 ${targetRoot.root}(${targetRoot.key})！`, `good`);
+
+        updateHud();
+
+        /* Retire other up moles cleanly & advance target after a short beat */
+        game.holes.forEach(function (other) {
+          if (other.index !== holeIdx && other.active && other.state === `up`) {
+            hideHole(other);
+          }
+        });
+
+        setTimeout(function () {
+          hideHole(holeObj);
+          if (game.running && !game.paused) {
+            pickNextTargetRoot();
+            spawnMole();
+          }
+        }, 480);
+      } else {
+        /* Wrong Whack! */
+        if (holeObj.hideTimeout) {
+          clearTimeout(holeObj.hideTimeout);
+          holeObj.hideTimeout = null;
+        }
+        holeObj.state = `wrong`;
+        holeObj.el.classList.add(`is-wrong`);
+
+        game.combo = 0;
+        game.score = Math.max(0, game.score - 20);
+        game.missedShapeCounts[clickedShape.id] = (game.missedShapeCounts[clickedShape.id] || 0) + 1;
+
+        playTone(`wrong`, 0);
+        showHolePopup(holeObj, `-20 哎呀!`, `oops`);
+        setPromptFeedback(`「${clickedShape.name}」是【${clickedShape.rootChar}(${clickedShape.rootKey})】喔！`, `bad`);
+
+        updateHud();
+
+        setTimeout(function () {
+          hideHole(holeObj);
+        }, 380);
+      }
+    }
+
+    /* =========================================================================
+       Game Lifecycle (Start, Pause, Finish)
+       ========================================================================= */
+    function closeAllModals() {
+      const ids = [`start-overlay`, `guide-overlay`, `summary-overlay`];
+      ids.forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove(`open`);
+      });
+    }
+
+    function startGame() {
+      ensureAudio();
+      closeAllModals();
+      clearAllHoles();
+
+      if (game.timerInterval) clearInterval(game.timerInterval);
+      if (game.spawnInterval) clearInterval(game.spawnInterval);
+
+      game.running = true;
+      game.paused = false;
+      game.timeLeft = GAME_SECONDS;
+      game.score = 0;
+      game.combo = 0;
+      game.maxCombo = 0;
+      game.correctHits = 0;
+      game.totalClicks = 0;
+      game.rootQueue = [];
+      game.missedShapeCounts = {};
+      game.hitShapeCounts = {};
+
+      pickNextTargetRoot();
+      setPromptFeedback(`加油！連擊 3 次啟動狂熱光效！`, ``);
+      updateHud();
+
+      /* Initial gentle spawn */
+      setTimeout(function () {
+        if (game.running && !game.paused) spawnMole();
+      }, 250);
+      setTimeout(function () {
+        if (game.running && !game.paused) spawnMole();
+      }, 750);
+
+      game.spawnInterval = setInterval(spawnMole, SPAWN_INTERVAL_MS);
+      game.timerInterval = setInterval(function () {
+        if (!game.running || game.paused) return;
+        game.timeLeft -= 1;
+        updateHud();
+        if (game.timeLeft <= 0) {
+          finishGame();
+        }
+      }, 1000);
+    }
+
+    async function finishGame() {
+      game.running = false;
+      game.paused = false;
+      if (game.timerInterval) clearInterval(game.timerInterval);
+      if (game.spawnInterval) clearInterval(game.spawnInterval);
+      clearAllHoles();
+      playTone(`finish`, 0);
+
+      const accuracy = game.totalClicks > 0
+        ? Math.round((game.correctHits / game.totalClicks) * 100)
+        : 0;
+
+      /* Star rating calculation */
+      let stars = 1;
+      let verdict = `繼續練習會更強！`;
+      if (game.correctHits >= 12 && accuracy >= 85) {
+        stars = 3;
+        verdict = `倉頡筆劃小大師！`;
+      } else if (game.correctHits >= 6 && accuracy >= 60) {
+        stars = 2;
+        verdict = `表現非常棒喔！`;
+      } else if (game.correctHits === 0) {
+        stars = 1;
+        verdict = `再試一次挑戰看看！`;
+      }
+
+      /* Update persistent high score */
+      let isNewBest = false;
+      if (game.score > appData.bestScore && game.score > 0) {
+        appData.bestScore = game.score;
+        isNewBest = true;
+      }
+      if (accuracy > appData.bestAccuracy) {
+        appData.bestAccuracy = accuracy;
+      }
+      appData.gamesPlayed += 1;
+      updateBestBadge();
+      await saveAppProgress();
+
+      /* Populate Summary Modal */
+      const verdictEl = document.getElementById(`summary-verdict`);
+      const newBestEl = document.getElementById(`summary-new-best`);
+      const starsEl = document.getElementById(`summary-stars`);
+      const sumScoreEl = document.getElementById(`sum-score`);
+      const sumAccEl = document.getElementById(`sum-acc`);
+      const sumComboEl = document.getElementById(`sum-combo`);
+      const sumHitsEl = document.getElementById(`sum-hits`);
+      const reviewHeadEl = document.getElementById(`review-heading`);
+      const reviewListEl = document.getElementById(`review-list`);
+
+      if (verdictEl) verdictEl.textContent = verdict;
+      if (newBestEl) newBestEl.style.display = isNewBest ? `inline-flex` : `none`;
+      if (starsEl) {
+        starsEl.innerHTML = buildStarSvg(stars >= 1) + buildStarSvg(stars >= 2) + buildStarSvg(stars >= 3);
+      }
+      if (sumScoreEl) sumScoreEl.textContent = String(game.score);
+      if (sumAccEl) sumAccEl.textContent = `${accuracy}%`;
+      if (sumComboEl) sumComboEl.textContent = `x${game.maxCombo}`;
+      if (sumHitsEl) sumHitsEl.textContent = `${game.correctHits} / ${game.totalClicks}`;
+
+      /* Review list: prioritize missed shapes, plus hit shapes */
+      const missedIds = Object.keys(game.missedShapeCounts);
+      if (reviewHeadEl && reviewListEl) {
+        if (missedIds.length > 0) {
+          reviewHeadEl.textContent = `複習回顧：這幾個輔助字形要多看兩眼喔！`;
+          reviewListEl.innerHTML = missedIds.map(function (id) {
+            const s = ALL_SHAPES.find(function (item) { return item.id === id; });
+            if (!s) return ``;
+            return `
+              <div class="review-item">
+                <div class="study-glyph-mini">${buildShapeSvg(s.svg, `sign-glyph-svg`)}</div>
+                <div class="study-shape-meta">
+                  <span class="study-shape-name">${s.rootChar} (${s.rootKey}) · ${s.name}</span>
+                  <span class="study-shape-ex">${s.examples}</span>
+                </div>
+                <span class="review-badge need-review">誤敲 ${game.missedShapeCounts[id]} 次</span>
+              </div>
+            `;
+          }).join(``);
+        } else {
+          const hitIds = Object.keys(game.hitShapeCounts);
+          reviewHeadEl.textContent = hitIds.length > 0
+            ? `複習回顧：全對無失誤！本局敲中字形一覽`
+            : `複習回顧：7 個筆劃類字根`;
+          const displayShapes = hitIds.length > 0
+            ? hitIds.map(function (id) { return ALL_SHAPES.find(function (item) { return item.id === id; }); }).filter(Boolean)
+            : ALL_SHAPES.slice(0, 6);
+          reviewListEl.innerHTML = displayShapes.map(function (s) {
+            return `
+              <div class="review-item">
+                <div class="study-glyph-mini">${buildShapeSvg(s.svg, `sign-glyph-svg`)}</div>
+                <div class="study-shape-meta">
+                  <span class="study-shape-name">${s.rootChar} (${s.rootKey}) · ${s.name}</span>
+                  <span class="study-shape-ex">${s.examples}</span>
+                </div>
+                <span class="review-badge mastered">已掌握</span>
+              </div>
+            `;
+          }).join(``);
+        }
+      }
+
+      const summaryOverlay = document.getElementById(`summary-overlay`);
+      if (summaryOverlay) summaryOverlay.classList.add(`open`);
+    }
+
+    /* =========================================================================
+       Modal & Audio Controls (Hoisted Handlers)
+       ========================================================================= */
+    function openGuide() {
+      if (game.running) {
+        game.paused = true;
+      }
+      const guide = document.getElementById(`guide-overlay`);
+      if (guide) guide.classList.add(`open`);
+    }
+
+    function closeGuide() {
+      const guide = document.getElementById(`guide-overlay`);
+      if (guide) guide.classList.remove(`open`);
+      if (game.running) {
+        game.paused = false;
+      }
+    }
+
+    function closeGuideAndStartIfIdle() {
+      const guide = document.getElementById(`guide-overlay`);
+      if (guide) guide.classList.remove(`open`);
+      if (game.running) {
+        game.paused = false;
+      } else {
+        startGame();
+      }
+    }
+
+    function toggleSound() {
+      appData.soundEnabled = !appData.soundEnabled;
+      const label = document.getElementById(`sound-icon-label`);
+      if (label) {
+        label.textContent = appData.soundEnabled ? `音效：開` : `音效：關`;
+      }
+      if (appData.soundEnabled) {
+        ensureAudio();
+        playTone(`hit`, 0);
+      }
+      saveAppProgress();
+    }
+
+    /* =========================================================================
+       State Persistence (notebookAppApi)
+       ========================================================================= */
+    async function loadAppProgress() {
+      try {
+        if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
+          const saved = await window.notebookAppApi.getAppState();
+          if (saved && typeof saved === `object`) {
+            if (typeof saved.bestScore === `number`) appData.bestScore = saved.bestScore;
+            if (typeof saved.bestAccuracy === `number`) appData.bestAccuracy = saved.bestAccuracy;
+            if (typeof saved.gamesPlayed === `number`) appData.gamesPlayed = saved.gamesPlayed;
+            if (typeof saved.soundEnabled === `boolean`) appData.soundEnabled = saved.soundEnabled;
+          }
+        }
+      } catch (e) { /* ignore persistence read error */ }
+
+      const label = document.getElementById(`sound-icon-label`);
+      if (label) label.textContent = appData.soundEnabled ? `音效：開` : `音效：關`;
+      updateBestBadge();
+    }
+
+    async function saveAppProgress() {
+      try {
+        if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
+          await window.notebookAppApi.setAppState({
+            bestScore: appData.bestScore,
+            bestAccuracy: appData.bestAccuracy,
+            gamesPlayed: appData.gamesPlayed,
+            soundEnabled: appData.soundEnabled
+          });
+        }
+      } catch (e) { /* ignore persistence write error */ }
+    }
+
+    /* =========================================================================
+       App Boot
+       ========================================================================= */
+    async function bootApp() {
+      initBoard();
+      pickNextTargetRoot();
+      updateHud();
+      await loadAppProgress();
+
+      try {
+        if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
+          window.notebookAppApi.notifyAppReady();
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    if (document.readyState === `loading`) {
+      document.addEventListener(`DOMContentLoaded`, bootApp);
+    } else {
+      bootApp();
+    }
+  </script>
+</body>
+</html>
